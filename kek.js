@@ -1,6 +1,6 @@
 var callories = {
-  "smallHamburger": 20,
-  "bigHamburger": 40,
+  "small": 20,
+  "big": 40,
   "cheeseStuffing": 20,
   "saladStuffing": 5,
   "potatoStuffing": 10,
@@ -11,8 +11,8 @@ var callories = {
 }
 
 var cost = {
-  "smallHamburger": 50,
-  "bigHamburger": 100,
+  "small": 50,
+  "big": 100,
   "cheeseStuffing": 10,
   "saladStuffing": 20,
   "potatoStuffing": 15,
@@ -22,7 +22,9 @@ var cost = {
   "coffee": 80
 }
 
-var MenuItem = function(){
+var MenuItem = function(name){
+
+  this.name = name;
 
   var cost, callories
 
@@ -44,51 +46,63 @@ var MenuItem = function(){
 
 }
 
-var Drink = function(name, cost, callories){
-  this.name = name
+var Drink = function(name){
+  MenuItem.call(this, name)
   this.__proto__ = new MenuItem()
-  this.calculateCost(cost)
-  this.calculateCallories(callories)
+
+  this.cost = cost[name];
+  this.callories = callories[name];
+  this.calculateCost(this.cost)
+  this.calculateCallories(this.callories)
 }
 
-var Salad = function(name, weight, costPer100g, calloriesPer100g){
-  this.name = name
+var Salad = function(name, weight){
+  MenuItem.call(this, name)
+  this.__proto__ = new MenuItem()
+
+  this.costPer100g = cost[name]
+  this.calloriesPer100g = callories[name]
   this.weight = weight
-  this.__proto__ = new MenuItem()
-  this.calculateCost((costPer100g/100)*weight)
-  this.calculateCallories((calloriesPer100g/100)*weight)
+  
+  this.calculateCost((this.costPer100g/100)*weight)
+  this.calculateCallories((this.calloriesPer100g/100)*weight)
 }
 
-var Hamburger = function(name, size, stuffing){ // size = {cost: xxx, callories: xxx}; stuffing = [{cost: xxx, callories: xxx}...]
-  this.name = name
+var Hamburger = function(name, size, ...stuffing){
+  MenuItem.call(this, name)
+  this.__proto__ = new MenuItem()
+
   this.size = size
   this.stuffing = stuffing
-  this.__proto__ = new MenuItem()
+  
 
   function calculateHamburgerCost(){
+    console.log(cost[size])
     return stuffing.reduce(function(accumulator, currentValue){
-      return accumulator + currentValue.cost
-    }, size.cost)
+      return accumulator + cost[currentValue]
+    }, cost[size])
+    
   }
 
   function calculateHamburgerCallories(){
     return stuffing.reduce(function(accumulator, currentValue){
-      return accumulator + currentValue.callories
-    }, size.callories)
+      return accumulator + callories[currentValue]
+    }, callories[size])
   }
 
-  var cost = calculateHamburgerCost()
-  var callories = calculateHamburgerCallories()
+  var cost2 = calculateHamburgerCost()
+  var callories2 = calculateHamburgerCallories()
 
-  this.calculateCost(cost)
-  this.calculateCallories(callories)
+  this.calculateCost(cost2)
+  this.calculateCallories(callories2)
 }
 
 
 
 var Order = function() {
   this.foodItems = [];
-  this.isPaid = false;  
+  this.isPaid = false;
+  
 
 }
 
@@ -141,22 +155,30 @@ Order.prototype.pay = function() {
   console.log("Заказ оплачен, приятного аппетита!")
 }
 
-
+Order.prototype.getBill = function() {
+  var bill = [];
+  for (var key in this.foodItems) {
+    bill.push(this.foodItems[key].name)
+  }
+  console.log("Ваш заказ: " + bill.join(" "))
+}
 
 // Заказ из колы, бургера и салата
 // Создание Салатов
-var Caesar = new Salad('Caesar', 230, 100, 20),
-    Olivier = new Salad('Olivier', 150, 50, 80)
+var Caesar = new Salad('caesarSalad', 230),
+    Olivier = new Salad('olivierSalad', 150)
 // Создание напитка
-var cola = new Drink('Cola', 50, 40),
-    coffie = new Drink('Coffie', 80, 20)
+var cola = new Drink('cola'),
+    coffee = new Drink('coffee')
 // Создание гамбургера
-var BignumberNine = new Hamburger('Number 9 BIG', {cost: 100, callories: 40}, [{cost: 10, callories: 20}, {cost: 20, callories: 5}, {cost: 15, callories: 10}])
+var BignumberNine = new Hamburger('BigTasty', 'big', 'saladStuffing', 'potatoStuffing', 'cheeseStuffing')
 // Создание заказа посетителя
 var newOrder = new Order();
 newOrder.addFoodItem(cola);
 newOrder.addFoodItem(BignumberNine);
 newOrder.addFoodItem(Caesar);
+newOrder.addFoodItem(Olivier);
+newOrder.addFoodItem(coffee)
 // Получение показателей калорийности заказа
 newOrder.calculateCallories()
 // Получение показателей стоимости заказа
