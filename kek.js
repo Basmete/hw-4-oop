@@ -95,15 +95,21 @@ var Hamburger = function(name, size, ...stuffing){
 
   this.calculateCost(cost2)
   this.calculateCallories(callories2)
-}
 
+  this.getSize = function() {
+    console.log(`Size of your hamburger is ${this.size}`)
+  }
+
+  this.getStuffing = function() {
+    var stuffingOfhamburger = this.stuffing.join(", ")
+    console.log(`Stuffing of your hamburger includes: ${stuffingOfhamburger}`)
+  }
+}
 
 
 var Order = function() {
   this.foodItems = [];
   this.isPaid = false;
-  
-
 }
 
 Order.prototype.addFoodItem = function(foodItem) {
